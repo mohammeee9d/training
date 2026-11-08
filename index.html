@@ -380,9 +380,9 @@ function todayHtml(){
 
   // date bar
   h+=`<div class="datebar">
-    <button class="iconbtn" data-act="date" data-n="-1" aria-label="اليوم السابق">›</button>
+    <button class="iconbtn" data-act="date" data-n="-1" aria-label="اليوم السابق"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="d">${date===TODAY()?"اليوم":fmt(date,{weekday:"long"})}<small>${fmt(date,{day:"numeric",month:"long",year:"numeric"})}</small></div>
-    <button class="iconbtn" data-act="date" data-n="1" aria-label="اليوم التالي" ${date>=TODAY()?"disabled style='opacity:.35'":""}>‹</button>
+    <button class="iconbtn" data-act="date" data-n="1" aria-label="اليوم التالي" ${date>=TODAY()?"disabled style='opacity:.35'":""}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
   </div>`;
 
   // goals summary
@@ -437,8 +437,8 @@ function todayHtml(){
 
   // rules
   h+=`<div class="group">قواعد التدريب</div><section class="card"><ul class="rules">
-    <li>مجموعتين إحماء خفيفة قبل أول تمرين مركّب، ولا تنحسب.</li>
-    <li>المركّبة: اترك 1–2 تكرار احتياطي · راحة ${Math.round(st.restC/60*10)/10} دقيقة.</li>
+    <li>الإحماء: 8 دقائق مشي سريع + دقيقتين حركات مفاصل، ثم مجموعتين خفيفة قبل أول تمرين مركّب (ما تنحسب).</li>
+    <li>المركّبة: وقّف وأنت تقدر تسوي 1–2 تكرار زيادة بس · راحة ${Math.round(st.restC/60*10)/10} دقيقة.</li>
     <li>العزل: آخر مجموعة لين قرب الفشل · راحة ${st.restI} ثانية.</li>
     <li>وصلت أعلى التكرارات في كل المجموعات؟ زِد الوزن المرة الجاية.</li>
     <li>الوزن صباحاً بعد الحمام · راجع متوسط الأسبوع في التقرير.</li></ul></section>`;
@@ -502,9 +502,9 @@ const cls=v=>v==null?"lo":v>=.9?"hi":v>=.5?"mid":"lo";
 function reportHtml(){
   const end=reportEnd||TODAY(),R=weekReport(end),first=R.days[0]?R.days[0].date:end;
   let h=`<div class="datebar">
-    <button class="iconbtn" data-act="week" data-n="-7" aria-label="الأسبوع السابق">›</button>
+    <button class="iconbtn" data-act="week" data-n="-7" aria-label="الأسبوع السابق"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="d">تقرير الأسبوع<small>${fmt(first,{day:"numeric",month:"short"})} – ${fmt(end,{day:"numeric",month:"short",year:"numeric"})}</small></div>
-    <button class="iconbtn" data-act="week" data-n="7" aria-label="الأسبوع التالي" ${end>=TODAY()?"disabled style='opacity:.35'":""}>‹</button></div>`;
+    <button class="iconbtn" data-act="week" data-n="7" aria-label="الأسبوع التالي" ${end>=TODAY()?"disabled style='opacity:.35'":""}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button></div>`;
   h+=`<div class="tiles">
     <div class="tile main"><b>${P(R.total)}</b><span>الإجمالي</span></div>
     <div class="tile"><b>${P(R.iron)}</b><span>الحديد</span></div>
