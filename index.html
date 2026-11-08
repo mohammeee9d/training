@@ -342,7 +342,7 @@ function prevNote(exId,date){const ds_=Object.keys(S.log).filter(d=>d<date).sort
 function histFor(exId,n){return Object.keys(S.log).sort().reverse().map(d=>({date:d,sets:(S.log[d].sets||{})[exId]})).filter(x=>x.sets&&x.sets.length).slice(0,n)}
 const fs=s=>`${s.w}kg × ${s.r}`;
 function hintFor(x,p){
-  if(!p)return `أول مرة: اختر وزن تقدر تسوي فيه ${x.hi} تكرار وتترك 1–2 احتياط.`;
+  if(!p)return `أول مرة: اختر وزن توصل فيه ${x.hi} تكرار وتحس إنك تقدر تزيد 1–2 بس.`;
   const top=p.sets.length>=x.sets&&p.sets.slice(0,x.sets).every(s=>Number(s.r)>=x.hi);
   if(top){const step=x.c?2.5:1.25;return `وصلت ${x.hi} في كل المجموعات ← جرّب ${+(Number(p.sets[0].w)+step).toFixed(2)} كجم`}
   return `ثبّت الوزن وحاول تزيد تكرار (الهدف ${x.lo}–${x.hi})`}
