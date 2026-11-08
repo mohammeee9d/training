@@ -656,10 +656,13 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden){if(tMode!
 
 /* ================= GitHub Gist sync ================= */
 const GIST_DESC="mohammed-training-data",GIST_FILE="training.json",API="https://api.github.com";
-let token=lsGet(LS_TOKEN),gistId=lsGet(LS_GIST),syncT=null,syncing=false,syncState="off";
+let token=lsGet(LS_TOKEN),gistId=lsGet(LS_GIST),syncT=null,syncing=false,syncState="off",lastErr="",step="";
 function setSync(s){syncState=s;const d=$("syncDot"),t=$("syncText");d.className="dot"+(s==="ok"?" ok":s==="err"||s==="badtoken"?" err":"");
   t.textContent={off:"مزامنة",ok:"متزامن",busy:"جاري…",err:"بدون اتصال",badtoken:"المفتاح غلط"}[s]||"مزامنة"}
-async function gh(path,opts={}){const r=await fetch(API+path,{...opts,headers:{Authorization:"Bearer "+token,Accept:"application/vnd.github+json","Content-Type":"application/json",...(opts.headers||{})}});
+async function gh(path,opts={}){const hdr={Authorization:"Bearer "+token,Accept:"application/vnd.github+json"};if(opts.body)hdr["Content-Type"]="application/json";
+  let r;try{r=await fetch(API+path,{...opts,cache:"no-store",headers:hdr})}catch(e){const x=new Error("network: "+(e&&e.message||e));x.status=0;throw x}
+  if(!r.ok){let m="";try{m=(await r.json()).message||""}catch(_){}const e=new Error(`HTTP ${r.status} ${m}`);e.status=r.status;throw e}return r.status===204?null:r.json()}
+async function ghOld(path,opts={}){const r=await fetch(API+path,{...opts,headers:{Authorization:"Bearer "+token,Accept:"application/vnd.github+json","Content-Type":"application/json",...(opts.headers||{})}});
   if(!r.ok){const e=new Error("gh "+r.status);e.status=r.status;throw e}return r.status===204?null:r.json()}
 function merge(a,b){if(!b||!b.v)return a;if(!a||!a.v)return b;
   const r={v:1,settings:(b.settings&&b.settings.ts||0)>(a.settings&&a.settings.ts||0)?b.settings:a.settings,
@@ -678,19 +681,19 @@ async function readGist(id){const g=await gh("/gists/"+id);const f=g.files&&g.fi
 async function syncNow(loud){
   if(!token||syncing)return;syncing=true;setSync("busy");
   try{
-    let id=await findGist(),remote;
+    step="البحث عن ملف البيانات";let id=await findGist(),remote;step="قراءة البيانات";
     try{remote=await readGist(id)}catch(e){if(e.status===404){gistId=null;lsSet(LS_GIST,null);id=await findGist();remote=await readGist(id)}else throw e}
     const before=JSON.stringify(S),merged=merge(S,remote),mj=JSON.stringify(merged);
     S=merged;saveLocal();
-    if(!remote||JSON.stringify(remote)!==mj)await gh("/gists/"+id,{method:"PATCH",body:JSON.stringify({files:{[GIST_FILE]:{content:mj}}})});
-    setSync("ok");if(loud)toast("تمت المزامنة");
+    step="حفظ البيانات";if(!remote||JSON.stringify(remote)!==mj)await gh("/gists/"+id,{method:"PATCH",body:JSON.stringify({files:{[GIST_FILE]:{content:mj}}})});
+    setSync("ok");lastErr="";if(loud)toast("تمت المزامنة");
     if(before!==mj){const a=document.activeElement;if(!(a&&a.tagName==="INPUT"&&a.type!=="checkbox"))render()}
-  }catch(e){setSync(e.status===401||e.status===403?"badtoken":"err");if(loud)toast(e.status===401?"المفتاح غلط أو منتهي":"ما قدرت أتصل، بحاول لاحقاً")}
+  }catch(e){lastErr=`${step}: ${e.message||e}`;setSync(e.status===401||e.status===403?"badtoken":"err");if(loud)toast(e.status===401?"المفتاح غلط أو منتهي":"ما قدرت أتصل، بحاول لاحقاً")}
   finally{syncing=false}}
 function scheduleSync(){if(!token)return;clearTimeout(syncT);syncT=setTimeout(()=>syncNow(),2000)}
 function openSync(){const sh=$("sheet");sh.hidden=false;sh.innerHTML=`<div role="dialog" aria-modal="true" aria-labelledby="shT">
   <h2 id="shT" style="font-size:18px">المزامنة بين جوالاتك</h2>
-  ${token?`<div class="small">الحالة: <b>${$("syncText").textContent}</b>. بياناتك محفوظة في ملف خاص على حسابك في GitHub، وتطلع نفسها على الآيفون والأندرويد واللابتوب.</div>
+  ${token?`<div class="small">الحالة: <b>${$("syncText").textContent}</b>.${lastErr?`<div class="ltr small" style="margin-top:6px;padding:8px;border-radius:8px;background:var(--sunk);color:var(--bad);text-align:left;word-break:break-word">${esc(lastErr)}</div>`:""} بياناتك محفوظة في ملف خاص على حسابك في GitHub، وتطلع نفسها على الآيفون والأندرويد واللابتوب.</div>
     <div class="edtools"><button class="btn primary" data-act="sync-now">زامن الحين</button><button class="btn danger" data-act="sync-off">فصل هذا الجهاز</button><button class="btn" data-act="sync-close">إغلاق</button></div>`
   :`<div class="small muted">بدون مزامنة، السجل محفوظ في هذا الجهاز بس. سوّها مرة وحدة على كل جهاز:</div>
     <ol>
