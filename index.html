@@ -656,7 +656,8 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden){if(tMode!
 
 /* ================= GitHub Gist sync ================= */
 const GIST_DESC="mohammed-training-data",GIST_FILE="training.json",API="https://api.github.com";
-let token=lsGet(LS_TOKEN),gistId=lsGet(LS_GIST),syncT=null,syncing=false,syncState="off",lastErr="",step="";
+const cleanTok=v=>String(v||"").replace(/[^A-Za-z0-9_]/g,"");
+let token=cleanTok(lsGet(LS_TOKEN))||null,gistId=lsGet(LS_GIST),syncT=null,syncing=false,syncState="off",lastErr="",step="";
 function setSync(s){syncState=s;const d=$("syncDot"),t=$("syncText");d.className="dot"+(s==="ok"?" ok":s==="err"||s==="badtoken"?" err":"");
   t.textContent={off:"مزامنة",ok:"متزامن",busy:"جاري…",err:"بدون اتصال",badtoken:"المفتاح غلط"}[s]||"مزامنة"}
 async function gh(path,opts={}){const hdr={Authorization:"Bearer "+token,Accept:"application/vnd.github+json"};if(opts.body)hdr["Content-Type"]="application/json";
@@ -708,7 +709,8 @@ function openSync(){const sh=$("sheet");sh.hidden=false;sh.innerHTML=`<div role=
   </div>`;}
 function closeSync(){$("sheet").hidden=true}
 $("sheet").addEventListener("click",e=>{if(e.target.id==="sheet")closeSync()});
-async function saveToken(){const v=($("tokIn").value||"").trim();if(v.length<20){toast("الصق المفتاح كامل");return}
+async function saveToken(){const v=cleanTok($("tokIn").value);
+  if(!/^(ghp_|github_pat_|gho_)/.test(v)||v.length<30){toast("المفتاح لازم يبدأ بـ ghp_");return}
   token=v;lsSet(LS_TOKEN,v);gistId=null;lsSet(LS_GIST,null);closeSync();await syncNow(true);if(syncState==="badtoken"){lsSet(LS_TOKEN,null);token=null}}
 
 /* ================= boot ================= */
